@@ -30,7 +30,7 @@ class DateHandler:
         return self.date_obj.strftime(format)
  
  
-if __name__ == "main":
+if __name__ == "__main__":
     pass       
 
 
