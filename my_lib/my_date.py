@@ -1,37 +1,44 @@
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta
+import typing as t
 
-
-class DateHandler:
+class DateDeltaDay:
     
     
-    def __init__(self, date_obj: date | datetime ) -> None:
+    def __init__(self, date_obj: date, delta_d: int, max_delta: int=10, negative: bool=False) -> None:
         self.date_obj = date_obj
-    
-    @property
-    def date_obj(self) -> date:
-        return self._date_obj
-    
-    @date_obj.setter
-    def date_obj(self, date_obj) -> None:
-        if isinstance(date_obj, datetime):
-            date_obj = date_obj.date()
-        if not isinstance(date_obj, date):
-            raise ValueError("Invalid date object. DateHandler requires a date or datetime object.")
-        self._date_obj = date_obj
-    
-    def get_delta_days(self, input_days: int, max_delta: int = -10) -> 'DateHandler':
-        if not (0 <= abs(input_days) <= abs(max_delta)):
-            raise ValueError(f"Input days '{input_days}' must be a positive integer less than max delta '{max_delta}'.")
+        self.date_delta_obj = self._set_date_delta(delta_d, max_delta, negative)
         
-        self.date_delta = self.date_obj + timedelta(days=input_days)
-        return self.__class__(self.date_delta)
+        self._delta_d = delta_d
+        self._max_delta = max_delta
+        self._negative = negative
     
-    def formated_date(self, format='%d.%m.%Y' ) -> str:
-        return self.date_obj.strftime(format)
- 
+    def _set_date_delta(self, input_days: int, max_delta, negative):
+        if not 0 <= input_days <= max_delta:
+            raise ValueError(f"Input days '{input_days}' must be a positive integer less than max delta '{max_delta}'.")
+        input_days = input_days if not negative else -input_days
+        return self.date_obj + timedelta(days=input_days)
+
+    def get_min_max_date(self) -> tuple[date]:
+        min_date, max_date = self.date_obj, self.date_delta_obj
+        if self._negative:
+            min_date, max_date = max_date, min_date
+        
+        return min_date, max_date
+    
+    def delta_days_generator(self, step_days: int=1) -> t.Generator[date, None, None]:     
+        min_date, max_date = self.get_min_max_date()
+        for i in range(0, self._delta_d, step_days):
+            yield min_date + timedelta(days=i)
+        yield max_date    
+
  
 if __name__ == "__main__":
-    pass       
+    pass
+    # delta_5 = DateDeltaDay(date_obj=date.today(), delta_d=7, negative=True )
+    # print(type(delta_5.get_min_max_date()))
+    # print()
+    # [print(date) for date in delta_5.delta_days_generator()]
+    
 
 
         
