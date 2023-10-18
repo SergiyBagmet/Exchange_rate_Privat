@@ -18,12 +18,15 @@ class DateDeltaDay:
         input_days = input_days if not negative else -input_days
         return self.date_obj + timedelta(days=input_days)
 
-    def get_min_max_date(self) -> tuple[date]:
+    def get_min_max_date(self) -> list[date]:
+        if self._delta_d == 0:
+            return [self.date_obj]
+        
         min_date, max_date = self.date_obj, self.date_delta_obj
         if self._negative:
             min_date, max_date = max_date, min_date
         
-        return min_date, max_date
+        return [min_date, max_date]
     
     def delta_days_generator(self, step_days: int=1) -> t.Generator[date, None, None]:     
         min_date, max_date = self.get_min_max_date()
