@@ -47,16 +47,15 @@ async def a_parse_data_privat(
             }
 
 
-async def fetch_gen(urls):
-    for url in urls:
-        requester = AsyncApiRequester(url)
-        yield await requester.get_json()
-   
+async def fetch_and_parse(url, currencys):
+    requester = AsyncApiRequester(url)
+    data_json = await requester.get_json()
+    return await a_parse_data_privat(data_json, currencys)  
 
 async def main_privat(currencys):
     delta_d = int(sys.argv[1])
     urls = get_urls(delta_d)
-    return await asyncio.gather(*[a_parse_data_privat(data_json, currencys) async for data_json in fetch_gen(urls)], return_exceptions=True) 
+    return await asyncio.gather(*[fetch_and_parse(url, currencys) for url in urls], return_exceptions=True) 
      
 if __name__ == "__main__":
     if platform.system() == 'Windows':
