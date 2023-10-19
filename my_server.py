@@ -5,7 +5,7 @@ import names
 from websockets.server import WebSocketServerProtocol, serve
 from websockets.exceptions import ConnectionClosedOK
 
-from ex_privat import get_urls, AsyncPrivateParser
+from ex_privat import get_urls, ApiPrivateParser, AsyncApiRequester
 logging.basicConfig(level=logging.INFO)
 
 
@@ -48,15 +48,11 @@ class MyServer:
                         delta_d = 0
                     case [_, num_str] if num_str.isnumeric():
                         delta_d = int(num_str)
-                    case [_, num_str, *currencys] if num_str.isnumeric():
-                        delta_d = int(num_str)
-                        currencys = tuple(map(str.upper, currencys))
                     case _:
                         pass    
                 try:
                     #TODO
-                    results = await asyncio.gather(*[AsyncPrivateParser(url, (currencys)).a_parse() for url in get_urls(delta_d)], return_exceptions=True) 
-                    exchange_msg = '\n'.join(str(res) for res in results)
+                    pass
                 except ValueError as err:
                     exchange_msg = str(err)
                 finally:
