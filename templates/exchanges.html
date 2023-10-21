@@ -1,0 +1,24 @@
+<table border="1">
+    <tr>
+        <th>Date</th>
+        <th>Currency</th>
+        <th>Sale PB</th>
+        <th>Purchase PB</th>
+        <th>Sale NB</th>
+        <th>Purchase NB</th>
+    </tr>
+    {% for item in data %}
+    {% for date, currencies in item.items() %}
+    {% for currency, rates in currencies.items() %}
+    <tr>
+        <td>{{ date }}</td>
+        <td>{{ currency }}</td>
+        <td>{{ rates['sale PB'] }}</td>
+        <td>{{ rates['purchase PB'] }}</td>
+        <td>{{ rates['sale NB'] }}</td>
+        <td>{{ rates['purchase NB'] }}</td>
+    </tr>
+    {% endfor %}
+    {% endfor %}
+    {% endfor %}
+</table>

@@ -4,10 +4,11 @@ import websockets
 import names
 from websockets.server import WebSocketServerProtocol, serve
 from websockets.exceptions import ConnectionClosedOK
+from jinja2 import Environment, FileSystemLoader
 
-from ex_privat import get_urls, ApiPrivateParser, AsyncApiRequester
+from ex_privat import get_currency_from_privat
 logging.basicConfig(level=logging.INFO)
-
+ENV_J = Environment(loader=FileSystemLoader('templates'))
 
 class MyServer:
     clients = set()
@@ -42,24 +43,36 @@ class MyServer:
         ##TODO
         async for message in ws:
             if message.lower().strip().startswith("exchange"):
-                currencys = None
-                match message.split():
-                    case [_] :
-                        delta_d = 0
-                    case [_, num_str] if num_str.isnumeric():
-                        delta_d = int(num_str)
-                    case _:
-                        pass    
-                try:
-                    #TODO
-                    pass
-                except ValueError as err:
-                    exchange_msg = str(err)
-                finally:
-                    await self.send_to_client(ws, exchange_msg) ##TODO
+                exchange_msg = await self._exchange_msg(message.split()[1:]) 
+                await self.send_to_client(ws, f'html:{message}{exchange_msg}') ##TODO
             else:        
                 await self.send_to_clients(f"{ws.name}: {message}")
+                
+    async def _exchange_msg(self, input_lst: list[str]):
+        delta_d, num_str, currencies = None, None, None
+        match input_lst:
+            case [] :
+                delta_d = 0
+            case [num_str] if num_str.isnumeric():
+                delta_d = int(num_str)
+            case [*input_curr] if all(map(str.isalpha, input_curr)):
+                delta_d, currencies = 0, input_curr
+            case [num_str, *input_curr] if num_str.isnumeric() and all(map(str.isalpha, input_curr)):
+                    delta_d, currencies = int(num_str), input_curr
+            case _:
+                exchange_msg = ":  Invalid message format to exchange"   
+        try:
+            if currencies == ["ALL"] : currencies = False
+            exchange_rates = await get_currency_from_privat(delta_d, currencies)
+            template = ENV_J.get_template("exchanges.html")
+            exchange_msg = template.render(data=exchange_rates)
+            pass # TODO grafik
+        except ValueError as err:
+            exchange_msg = str(err)
+        finally:
+            return exchange_msg
 
+            
 
 async def main():
     my_server = MyServer()

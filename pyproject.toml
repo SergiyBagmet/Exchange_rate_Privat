@@ -12,6 +12,8 @@ aiohttp = "^3.8.6"
 websockets = "^11.0.3"
 faker = "^19.10.0"
 names = "^0.3.0"
+prettytable = "^3.9.0"
+jinja2 = "^3.1.2"
 
 
 [build-system]
