@@ -17,7 +17,7 @@ ws.onmessage = (e) => {
   text = e.data
 
   const parts = e.data.split(":");
-  if (parts.length === 2) {
+  if (parts.length >= 2) {
     const type = parts[0].trim();
     const content = parts[1].trim();
     

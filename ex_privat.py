@@ -16,6 +16,9 @@ def get_urls(delta_d: int) -> list[str]:
     delta = DateDeltaDay(date.today(), delta_d, negative=True)
     return [f"{URL_PRIVATE_BODY}{date.strftime('%d.%m.%Y')}" for date in delta.get_min_max_date()]
 
+class ExchangeError(Exception):
+    pass
+
 class AsyncApiRequester:
     
     
@@ -59,6 +62,8 @@ class PrivateParser:
             self.currencys = ("USD", "EUR")
         elif self.currencys is False:
             self.currencys = list(self.filtred_data.keys())
+            
+            
              
         self.parse_data = {api_data.get("date"): {
                             currency: {
@@ -80,12 +85,11 @@ async def fetch_and_parse(requester: AsyncApiRequester, parser: PrivateParser) -
     return parsed_data
         
 async def get_currency_from_privat(delta_d: int, currencys: t.Iterable[str]) -> list[dict]:
-    try:
-        parser = PrivateParser(currencys)
-        futures = [fetch_and_parse(AsyncApiRequester(url), parser) for url in get_urls(delta_d)]
-        return await asyncio.gather(*futures, return_exceptions=True) 
-    except IndexError as err:
-        return err
+   
+    parser = PrivateParser(currencys)
+    futures = [fetch_and_parse(AsyncApiRequester(url), parser) for url in get_urls(delta_d)]
+    return await asyncio.gather(*futures, return_exceptions=True) 
+    
     
   
 if __name__ == "__main__":
@@ -93,6 +97,6 @@ if __name__ == "__main__":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     
     delta_d = int(sys.argv[1])
-    print(asyncio.run(get_currency_from_privat(delta_d)))
+    print(asyncio.run(get_currency_from_privat(delta_d, None)))
     
    
